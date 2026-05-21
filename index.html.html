@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERENCY'S Authentic Home Kitchen & Herbals</title>
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary-orange: #d84315; 
+            --herbal-green: #2e7d32;    
+            --bg-light: #fff3e0;
+            --text-dark: #333;
+        }
+
+        /* Basic Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: #fcfcfc; color: var(--text-dark); line-height: 1.6; padding-bottom: 80px; }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80') center/cover;
+            color: white; text-align: center; padding: 100px 20px;
+        }
+
+        .hero h1 { font-size: 2.5rem; margin-bottom: 15px; }
+        .hero p { font-size: 1.2rem; margin-bottom: 30px; max-width: 600px; margin: 0 auto; }
+
+        /* Section Styling */
+        section { padding: 60px 20px; max-width: 1000px; margin: 0 auto; }
+        .section-title {
+            text-align: center; font-size: 2rem; margin-bottom: 10px;
+            color: var(--primary-orange); border-bottom: 2px solid var(--primary-orange);
+            display: inline-block; padding-bottom: 5px;
+        }
+        .section-subtitle { text-align: center; margin-bottom: 40px; color: #d32f2f; font-size: 1.1rem; font-weight: bold;}
+
+        /* Grid Layouts for Menu */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+
+        /* Image Background Cards */
+        .card {
+            border-radius: 12px; padding: 30px 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: white; 
+            background-size: cover; background-position: center; min-height: 280px; display: flex; 
+            flex-direction: column; justify-content: flex-end; border-bottom: 5px solid var(--primary-orange); 
+            cursor: pointer; transition: 0.3s;
+        }
+        .card.herbal-card { border-bottom: 5px solid var(--herbal-green); }
+        .card h3 { font-size: 1.4rem; margin-bottom: 5px; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); }
+        .card p { font-size: 0.95rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); }
+        .click-hint { font-size: 0.85rem; color: #ffeb3b; margin-top: 10px; font-weight: bold; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); }
+
+        /* Hidden Pricing & Cart Controls */
+        .price-details {
+            display: none; background: rgba(0, 0, 0, 0.95); padding: 15px; margin-top: 15px; 
+            border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .card.active .price-details { display: block; animation: fadeIn 0.3s; }
+
+        .cart-controls { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .cart-controls select, .cart-controls input {
+            padding: 8px; border-radius: 5px; border: none; width: 100%; font-size: 0.95rem; background: #fff; color: #333;
+        }
+        .btn-add {
+            background: var(--primary-orange); color: white; border: none; padding: 10px;
+            border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px;
+        }
+        .herbal-card .btn-add { background: var(--herbal-green); }
+
+        /* Catering Banner Section */
+        .catering-banner {
+            background-color: var(--bg-light); text-align: center; padding: 50px 20px;
+            border-radius: 12px; margin: 20px auto 60px auto; max-width: 1000px;
+            border: 2px dashed var(--primary-orange);
+        }
+        .catering-banner h2 { color: var(--primary-orange); margin-bottom: 15px; font-size: 2.2rem; }
+        .catering-banner p { max-width: 750px; margin: 0 auto 20px auto; font-size: 1.1rem; color: #444; }
+
+        /* Floating Cart Button */
+        .floating-cart {
+            position: fixed; bottom: 20px; right: 20px; background: #222; color: white; padding: 15px 25px; 
+            border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+            cursor: pointer; z-index: 1000; border: 2px solid white;
+        }
+
+        /* Cart Modal */
+        .cart-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;
+        }
+        .cart-content {
+            background: white; width: 90%; max-width: 500px; border-radius: 12px; padding: 25px; 
+            max-height: 90vh; overflow-y: auto; color: #333; position: relative;
+        }
+        .close-cart { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #888; }
+        .cart-section h4 { border-bottom: 2px solid #ddd; margin: 15px 0 10px 0; padding-bottom: 5px; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; align-items: flex-start; }
+        .cart-item-info { flex: 1; }
+        .remove-btn { color: red; cursor: pointer; font-weight: bold; margin-left: 10px; border: none; background: none; }
+
+        /* Checkout Form */
+        .checkout-form { margin-top: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px; }
+        .checkout-form input, .checkout-form textarea {
+            width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit;
+        }
+        .btn-whatsapp {
+            display: block; background-color: #25D366; color: white; padding: 15px; text-align: center; 
+            border-radius: 8px; font-weight: bold; text-decoration: none; border: none; width: 100%; cursor: pointer; font-size: 1.1rem;
+        }
+        /* Enhanced Footer */
+        footer {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #f1f1f1;
+            text-align: center;
+            padding: 70px 20px 30px;
+            margin-top: 60px;
+            border-top: 4px solid var(--primary-orange);
+        }
+
+        footer h2 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            color: white;
+        }
+
+        footer p {
+            color: #ccc;
+            font-size: 1.05rem;
+            max-width: 550px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        /* Upgraded WhatsApp Button */
+        .footer-whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: #25D366;
+            color: white;
+            padding: 16px 35px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .footer-whatsapp-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5);
+            background-color: #22c35e;
+        }
+
+        /* Frosted Glass Delivery Box */
+        .delivery-info {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 35px;
+            border-radius: 16px;
+            max-width: 800px;
+            margin: 50px auto 40px;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .delivery-info h4 {
+            color: #ffeb3b;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 235, 59, 0.2);
+            padding-bottom: 12px;
+        }
+
+        .delivery-info ul {
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .delivery-info li {
+            font-size: 1rem;
+            line-height: 1.6;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            color: #ddd;
+        }
+
+        .delivery-icon {
+            font-size: 1.4rem;
+            line-height: 1.2;
+        }
+
+        .copyright {
+            padding-top: 25px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <h1>TERENCY'S Authentic Home Kitchen & Herbals</h1>
+        <p>Rich, slow-cooked meals and premium homemade essentials sent straight to your door.</p>
+    </div>
+
+    <section>
+        <div style="text-align: center;">
+            <h2 class="section-title">The Hot Kitchen</h2>
+            <p class="section-subtitle">⚠️ IMPORTANT: All hot food orders require 6 HOURS prior notice and will be available within Matale District <strong>only</strong>. Minimum order: 5 Portions.</p>
+        </div>
+        <div class="menu-grid">
+            
+            <div class="card" onclick="toggleCard(this)" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('images/biriyani1.jpg');">
+                <h3>Signature Home-Style Biriyani</h3>
+                <p>Served with Boiled Egg, Gravy, and Raitha (Egg option includes Potato Roast).</p>
+                <div class="click-hint">Tap to order</div>
+                <div class="price-details" onclick="event.stopPropagation()">
+                    <div class="cart-controls">
+                        <select id="sel-biriyani">
+                            <option value="Mutton|1400">Mutton - Rs. 1400</option>
+                            <option value="Chicken|1100">Chicken - Rs. 1100</option>
+                            <option value="Fish|1000">Fish - Rs. 1000</option>
+                            <option value="Egg|800">Egg (w/ Potato Roast) - Rs. 800</option>
+                        </select>
+                        <input type="number" id="qty-biriyani" min="5" value="5" placeholder="Qty (Min 5)">
+                        <button class="btn-add" onclick="addHotFood('Signature Biriyani', 'sel-biriyani', null, 'qty-biriyani')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggleCard(this)" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('images/friedrice1.jpg');">
+                <h3>Classic Wok-Tossed Fried Rice</h3>
+                <p>Served with Batu Moju & Chilli Paste. Meat options include gravy.</p>
+                <div class="click-hint">Tap to order</div>
+                <div class="price-details" onclick="event.stopPropagation()">
+                    <div class="cart-controls">
+                        <select id="sel-friedrice">
+                            <option value="Chicken (Mixed with Rice)|650">Chicken (Mixed) - Rs. 650</option>
+                            <option value="Chicken (Devilled Separate)|650">Chicken (Devilled Separate) - Rs. 650</option>
+                            <option value="Fish (Mixed with Rice)|600">Fish (Mixed) - Rs. 600</option>
+                            <option value="Fish (Devilled Separate)|600">Fish (Devilled Separate) - Rs. 600</option>
+                            <option value="Egg (w/ Potato Roast)|550">Egg (w/ Potato Roast) - Rs. 550</option>
+                            <option value="Vegetable (w/ Potato Roast)|550">Vegetable (w/ Potato Roast) - Rs. 550</option>
+                        </select>
+                        <select id="gravy-friedrice">
+                            <option value="Chicken Gravy">Chicken Gravy</option>
+                            <option value="Fish Gravy">Fish Gravy</option>
+                            <option value="No Gravy (For Veg)">No Gravy</option>
+                        </select>
+                        <input type="number" id="qty-friedrice" min="5" value="5" placeholder="Qty (Min 5)">
+                        <button class="btn-add" onclick="addHotFood('Fried Rice', 'sel-friedrice', 'gravy-friedrice', 'qty-friedrice')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggleCard(this)" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('images/riceandcurry.jpg');">
+                <h3>Traditional Lunch Menu</h3>
+                <p>Includes Beans milk curry, dhal, Papadam, brinjal moju, and greens.</p>
+                <div class="click-hint">Tap to order</div>
+                <div class="price-details" onclick="event.stopPropagation()">
+                    <div class="cart-controls">
+                        <select id="sel-lunch">
+                            <option value="Chicken|650">Chicken - Rs. 650</option>
+                            <option value="Fish|640">Fish - Rs. 640</option>
+                            <option value="Egg|550">Egg - Rs. 550</option>
+                            <option value="Vegetable (+ Rasam)|500">Vegetable (+ Rasam) - Rs. 500</option>
+                        </select>
+                        <input type="number" id="qty-lunch" min="5" value="5" placeholder="Qty (Min 5)">
+                        <button class="btn-add" onclick="addHotFood('Traditional Lunch', 'sel-lunch', null, 'qty-lunch')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="catering-banner">
+        <h2>🎉 Event & Gathering Catering</h2>
+        <p>Hosting an event, almsgiving, or special gathering? Let us bring the authentic taste of our home kitchen to your occasion. We specialize in catering for groups of <strong>30 to 50 members</strong>, offering comprehensive <strong>Buffet Packages</strong>.</p>
+        <p><em>Prices and customized menus will be discussed and finalized directly with you to perfectly match your event's needs.</em></p>
+        <a href="https://wa.me/94765850328?text=Hi, I would like to inquire about a catering package for an upcoming event of 30-50 members." class="btn-whatsapp" style="max-width: 400px; margin: 20px auto 0 auto; display: inline-block;">Enquire About Catering on WhatsApp</a>
+    </div>
+
+    <section>
+        <div style="text-align: center;">
+            <h2 class="section-title" style="color: var(--herbal-green); border-color: var(--herbal-green);">Premium Herbals & Condiments</h2>
+            <p style="color: #666; margin-bottom: 40px;">Courier delivery available island-wide for these items.</p>
+        </div>
+        <div class="menu-grid">
+            
+            <div class="card herbal-card" onclick="toggleCard(this)" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('images/moringapowder.jpg');">
+                <h3>Pure Moringa Powder</h3>
+                <div class="click-hint">Tap to select weight & order</div>
+                <div class="price-details" onclick="event.stopPropagation()">
+                    <div class="cart-controls">
+                        <select id="weight-mpowder">
+                            <option value="100G|400">100G - Rs. 400</option>
+                            <option value="200G|750">200G - Rs. 750</option>
+                            <option value="500G|1800">500G - Rs. 1800</option>
+                            <option value="1KG|3500">1KG - Rs. 3500</option>
+                        </select>
+                        <input type="number" id="qty-mpowder" min="1" value="1">
+                        <button class="btn-add" onclick="addHerbal('Pure Moringa Powder', 'weight-mpowder', 'qty-mpowder')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card herbal-card" onclick="toggleCard(this)" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('images/morinngariceflour.jpg');">
+                <h3>Moringa Rice Flour</h3>
+                <div class="click-hint">Tap to select weight & order</div>
+                <div class="price-details" onclick="event.stopPropagation()">
+                    <div class="cart-controls">
+                        <select id="weight-mrice">
+                            <option value="100G|300">100G - Rs. 300</option>
+                            <option value="200G|550">200G - Rs. 550</option>
+                            <option value="500G|1300">500G - Rs. 1300</option>
+                            <option value="1KG|2500">1KG - Rs. 2500</option>
+                        </select>
+                        <input type="number" id="qty-mrice" min="1" value="1">
+                        <button class="btn-add" onclick="addHerbal('Moringa Rice Flour', 'weight-mrice', 'qty-mrice')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card herbal-card" onclick="toggleCard(this)" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('images/dosaflour.jpg');">
+                <h3>Moringa Dosa Flour</h3>
+                <div class="click-hint">Tap to select weight & order</div>
+                <div class="price-details" onclick="event.stopPropagation()">
+                    <div class="cart-controls">
+                        <select id="weight-mdosa">
+                            <option value="100G|350">100G - Rs. 350</option>
+                            <option value="200G|650">200G - Rs. 650</option>
+                            <option value="500G|1500">500G - Rs. 1500</option>
+                            <option value="1KG|2800">1KG - Rs. 2800</option>
+                        </select>
+                        <input type="number" id="qty-mdosa" min="1" value="1">
+                        <button class="btn-add" onclick="addHerbal('Moringa Dosa Flour', 'weight-mdosa', 'qty-mdosa')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card herbal-card" onclick="toggleCard(this)" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('images/masalateapowder.jpg');">
+                <h3>Masala Tea Powder</h3>
+                <div class="click-hint">Tap to select weight & order</div>
+                <div class="price-details" onclick="event.stopPropagation()">
+                    <div class="cart-controls">
+                        <select id="weight-tea">
+                            <option value="50G|300">50G - Rs. 300</option>
+                            <option value="100G|550">100G - Rs. 550</option>
+                            <option value="250G|1300">250G - Rs. 1300</option>
+                            <option value="500G|2500">500G - Rs. 2500</option>
+                            <option value="1KG|4800">1KG - Rs. 4800</option>
+                        </select>
+                        <input type="number" id="qty-tea" min="1" value="1">
+                        <button class="btn-add" onclick="addHerbal('Masala Tea Powder', 'weight-tea', 'qty-tea')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card herbal-card" onclick="toggleCard(this)" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('images/maldivessambol.jpg');">
+                <h3>Classic Maldives Sambol</h3>
+                <div class="click-hint">Tap to select weight & order</div>
+                <div class="price-details" onclick="event.stopPropagation()">
+                    <div class="cart-controls">
+                        <select id="weight-sambol">
+                            <option value="500G|1200">500G - Rs. 1200</option>
+                            <option value="1KG|2300">1KG - Rs. 2300</option>
+                        </select>
+                        <input type="number" id="qty-sambol" min="1" value="1">
+                        <button class="btn-add" onclick="addHerbal('Maldives Sambol', 'weight-sambol', 'qty-sambol')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card herbal-card" onclick="toggleCard(this)" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('images/chillipaste1.jpg');">
+                <h3>Homemade Chilli Paste</h3>
+                <div class="click-hint">Tap to select weight & order</div>
+                <div class="price-details" onclick="event.stopPropagation()">
+                    <div class="cart-controls">
+                        <select id="weight-chilli">
+                            <option value="500G|900">500G - Rs. 900</option>
+                            <option value="1KG|1700">1KG - Rs. 1700</option>
+                        </select>
+                        <input type="number" id="qty-chilli" min="1" value="1">
+                        <button class="btn-add" onclick="addHerbal('Homemade Chilli Paste', 'weight-chilli', 'qty-chilli')">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="floating-cart" onclick="openCart()">
+        🛒 View Cart (<span id="cart-count">0</span>)
+    </div>
+
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <span class="close-cart" onclick="closeCart()">&times;</span>
+            <h2 style="color: var(--primary-orange); margin-bottom: 10px;">Your Order</h2>
+
+            <div id="cart-items-display"></div>
+
+            <div class="checkout-form">
+                <h4 style="margin-bottom: 10px;">Delivery Details</h4>
+                <input type="text" id="cust-name" placeholder="Your Full Name*" required>
+                <input type="tel" id="cust-phone" placeholder="Phone Number*" required>
+                <textarea id="cust-address" rows="3" placeholder="Full Delivery Address*" required></textarea>
+                <input type="url" id="cust-location" placeholder="Google Maps Live Location Link (Optional)">
+                <button class="btn-whatsapp" onclick="placeOrder()">Send Order via WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cart = { hotFoods: [], herbals: [] };
+
+        function toggleCard(element) { element.classList.toggle('active'); }
+
+        // HOT FOOD LOGIC
+        function addHotFood(baseName, typeId, gravyId, qtyId) {
+            let qty = parseInt(document.getElementById(qtyId).value);
+            if (qty < 5) { alert("Reminder: Minimum 5 portions required for all hot foods."); return; }
+
+            let typeVal = document.getElementById(typeId).value.split('|');
+            let variantName = typeVal[0];
+            let price = parseInt(typeVal[1]);
+            let fullDetails = variantName;
+            
+            if (gravyId) {
+                let gravyChoice = document.getElementById(gravyId).value;
+                fullDetails += ` (+ ${gravyChoice})`;
+            }
+
+            cart.hotFoods.push({ name: baseName, details: fullDetails, price: price, qty: qty });
+            updateCartCount();
+            alert(`${qty}x ${baseName} (${variantName}) added to cart!`);
+        }
+
+        // HERBALS LOGIC WITH DYNAMIC PRICING
+        function addHerbal(name, weightSelectId, qtyId) {
+            let selectVal = document.getElementById(weightSelectId).value.split('|');
+            let weight = selectVal[0];
+            let price = parseInt(selectVal[1]);
+            let qty = parseInt(document.getElementById(qtyId).value);
+            
+            if (qty < 1) return;
+            
+            cart.herbals.push({ name: name, weight: weight, price: price, qty: qty });
+            updateCartCount();
+            alert(`${qty}x ${name} (${weight}) added to cart!`);
+        }
+
+        function updateCartCount() {
+            document.getElementById('cart-count').innerText = cart.hotFoods.length + cart.herbals.length;
+        }
+
+        function removeHotItem(index) { cart.hotFoods.splice(index, 1); renderCart(); updateCartCount(); }
+        function removeHerbalItem(index) { cart.herbals.splice(index, 1); renderCart(); updateCartCount(); }
+
+        function renderCart() {
+            let html = "";
+            let grandTotal = 0;
+
+            if(cart.hotFoods.length > 0) {
+                html += "<div class='cart-section'><h4 style='color:var(--primary-orange);'>🍲 Hot Foods (6 Hrs Notice Req.)</h4>";
+                let hotSubtotal = 0;
+                cart.hotFoods.forEach((item, index) => {
+                    let itemTotal = item.qty * item.price;
+                    hotSubtotal += itemTotal;
+                    html += `
+                    <div class='cart-item'>
+                        <div class='cart-item-info'>
+                            <strong>${item.qty}x ${item.name}</strong><br>
+                            <span style="font-size: 0.85em; color: #555;">${item.details} (Rs.${item.price} ea)</span>
+                        </div>
+                        <div>Rs.${itemTotal} <button class='remove-btn' onclick='removeHotItem(${index})'>X</button></div>
+                    </div>`;
+                });
+                grandTotal += hotSubtotal;
+                html += `<div style="text-align:right; font-weight:bold; margin-top:5px; color:#555;">Hot Food Subtotal: Rs. ${hotSubtotal}</div></div>`;
+            }
+
+            if(cart.herbals.length > 0) {
+                html += "<div class='cart-section'><h4 style='color:var(--herbal-green);'>🌿 Herbals & Condiments</h4>";
+                let herbSubtotal = 0;
+                cart.herbals.forEach((item, index) => {
+                    let itemTotal = item.qty * item.price;
+                    herbSubtotal += itemTotal;
+                    html += `
+                    <div class='cart-item'>
+                        <div class='cart-item-info'>
+                            <strong>${item.qty}x ${item.name} (${item.weight})</strong><br>
+                            <span style="font-size: 0.85em; color: #555;">(Rs.${item.price} ea)</span>
+                        </div>
+                        <div>Rs.${itemTotal} <button class='remove-btn' onclick='removeHerbalItem(${index})'>X</button></div>
+                    </div>`;
+                });
+                grandTotal += herbSubtotal;
+                html += `<div style="text-align:right; font-weight:bold; margin-top:5px; color:#555;">Herbals Subtotal: Rs. ${herbSubtotal}</div></div>`;
+            }
+
+            if(cart.hotFoods.length > 0 || cart.herbals.length > 0) {
+                html += `<div style="text-align:right; font-size:1.2rem; font-weight:bold; margin-top:15px; border-top: 2px solid #333; padding-top: 10px;">Cart Total: Rs. ${grandTotal}</div>`;
+                html += `<div style="text-align:right; font-size:0.8em; color:#888;">*Courier/Delivery charges calculated separately</div>`;
+            } else {
+                html = "<p style='text-align:center; padding: 20px;'>Your cart is empty.</p>";
+            }
+
+            document.getElementById('cart-items-display').innerHTML = html;
+        }
+
+        function openCart() {
+            renderCart();
+            document.getElementById('cartModal').style.display = "flex";
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').style.display = "none";
+        }
+
+        function placeOrder() {
+            if(cart.hotFoods.length === 0 && cart.herbals.length === 0) {
+                alert("Please add items to your cart first."); return;
+            }
+
+            let name = document.getElementById('cust-name').value.trim();
+            let phone = document.getElementById('cust-phone').value.trim();
+            let address = document.getElementById('cust-address').value.trim();
+            let location = document.getElementById('cust-location').value.trim();
+
+            if(!name || !phone || !address) {
+                alert("Please fill in your Name, Phone Number, and Address to place the order.");
+                return;
+            }
+
+            let msg = `*NEW ORDER FROM WEBSITE* 🛎️\n\n`;
+            msg += `*👤 Customer Details:*\nName: ${name}\nPhone: ${phone}\nAddress: ${address}\n`;
+            if(location) msg += `Location Link: ${location}\n`;
+            msg += `\n`;
+
+            let grandTotal = 0;
+
+            if(cart.hotFoods.length > 0) {
+                let hotSubtotal = 0;
+                msg += `*🍲 HOT FOODS (6 Hrs Notice):*\n`;
+                cart.hotFoods.forEach(item => { 
+                    let lineTotal = item.qty * item.price;
+                    hotSubtotal += lineTotal;
+                    msg += `- ${item.qty}x ${item.name} [${item.details}] @ Rs.${item.price} = Rs.${lineTotal}\n`; 
+                });
+                grandTotal += hotSubtotal;
+                msg += `*Hot Foods Subtotal: Rs.${hotSubtotal}*\n\n`;
+            }
+
+            if(cart.herbals.length > 0) {
+                let herbSubtotal = 0;
+                msg += `*🌿 HERBALS & CONDIMENTS:*\n`;
+                cart.herbals.forEach(item => { 
+                    let lineTotal = item.qty * item.price;
+                    herbSubtotal += lineTotal;
+                    msg += `- ${item.qty}x ${item.name} (${item.weight}) @ Rs.${item.price} = Rs.${lineTotal}\n`; 
+                });
+                grandTotal += herbSubtotal;
+                msg += `*Herbals Subtotal: Rs.${herbSubtotal}*\n\n`;
+            }
+
+            msg += `*🛒 GRAND TOTAL: Rs.${grandTotal}*\n`;
+            msg += `*Note:* Final total including courier/delivery charges will be confirmed shortly.\n`;
+
+            let waUrl = `https://wa.me/94765850328?text=${encodeURIComponent(msg)}`;
+            window.open(waUrl, '_blank');
+        }
+        
+    </script>
+    <!-- Footer / Ordering Details -->
+   <footer>
+        <h2>Ready to Order?</h2>
+        <p>Reach out to us directly for exact pricing, personalized catering menus, or any other inquiries.</p>
+        
+        <a href="https://wa.me/94765850328" class="footer-whatsapp-btn">
+            💬 Message Us on WhatsApp (076 585 0328)
+        </a>
+        
+        <div class="delivery-info">
+            <h4>🚚 Delivery & Fulfillment Policy</h4>
+            <ul>
+                <li>
+                    <span class="delivery-icon">📦</span>
+                    <div>
+                        <strong style="color: white;">Herbals & Condiments:</strong> 
+                        We offer island-wide courier delivery for our packaged products. Courier charges are incurred by the customer and will be calculated and added to your final bill.
+                    </div>
+                </li>
+                <li>
+                    <span class="delivery-icon">🍲</span>
+                    <div>
+                        <strong style="color: white;">Hot Foods (Biriyani, Fried Rice, Lunch):</strong> 
+                        To ensure maximum freshness and quality, hot meals are exclusively available via direct pickup or local delivery. We do not courier hot meals.
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="copyright">
+            &copy; 2026 TERENCY'S Authentic Home Kitchen & Herbals. All Rights Reserved.
+        </div>
+    </footer>
+</body>
+</html>
