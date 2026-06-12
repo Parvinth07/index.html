@@ -1,0 +1,37 @@
+name: QA & Build Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  quality-assurance:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Grab the code from the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up a Node environment to run QA tools
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Step 3: Install a lightweight HTML linter (QA tool)
+      - name: Install HTMLHint
+        run: npm install -g htmlhint
+
+      # Step 4: Run the automated QA check on your index file
+      - name: Run Static Code Analysis
+        run: htmlhint index.html.html
+        
+      # Step 5: (Simulated) Upload Artifact ready for deployment
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: terencys-web-build
+          path: index.html.html
